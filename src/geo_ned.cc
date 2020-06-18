@@ -5,10 +5,11 @@
 //  Created by Karan on 4/9/18.
 //  Copyright © 2018 Karan. All rights reserved.
 //
-
 #include "geo_ned.hpp"
 
+
 using namespace geodectic_converter;
+
 
 GeodecticConverter::GeodecticConverter()
 :_have_reference(false)
@@ -19,7 +20,10 @@ bool GeodecticConverter::isInitialised()
     return _have_reference;
 }
 
-void GeodecticConverter::getReference(double &latitude, double &longitude, double &altitude)
+void GeodecticConverter::getReference(
+    double& latitude,
+    double& longitude,
+    double& altitude)
 {
     latitude = _initial_latitude;
     longitude = _initial_longitude;
@@ -28,7 +32,10 @@ void GeodecticConverter::getReference(double &latitude, double &longitude, doubl
     return;
 }
 
-void GeodecticConverter::intializeReference(const double latitude, const double longitude, const double altitude)
+void GeodecticConverter::intializeReference(
+    const double latitude,
+    const double longitude,
+    const double altitude)
 {
     // Save origin
     _initial_latitude = deg2Rad(latitude);
@@ -47,8 +54,13 @@ void GeodecticConverter::intializeReference(const double latitude, const double 
     _have_reference = true;
 }
 
-void GeodecticConverter::geodetic2Ecef(const double latitude, const double longitude, const double altitude, double* x,
-                   double* y, double* z)
+void GeodecticConverter::geodetic2Ecef(
+    const double latitude,
+    const double longitude,
+    const double altitude,
+    double* x,
+    double* y,
+    double* z)
 {
     // Convert geodetic coordinates to ECEF.
     // http://code.google.com/p/pysatel/source/browse/trunk/coord.py?r=22
@@ -60,8 +72,13 @@ void GeodecticConverter::geodetic2Ecef(const double latitude, const double longi
     *z = (kSemimajorAxis / xi * (1 - kFirstEccentricitySquared) + altitude) * sin(lat_rad);
 }
 
-void GeodecticConverter::ecef2Geodetic(const double x, const double y, const double z, double* latitude,
-                   double* longitude, double* altitude)
+void GeodecticConverter::ecef2Geodetic(
+    const double x,
+    const double y,
+    const double z,
+    double* latitude,
+    double* longitude,
+    double* altitude)
 {
     // Convert ECEF coordinates to geodetic coordinates.
     // J. Zhu, "Conversion of Earth-centered Earth-fixed coordinates
@@ -76,21 +93,22 @@ void GeodecticConverter::ecef2Geodetic(const double x, const double y, const dou
     double S = cbrt(1 + C + sqrt(C * C + 2 * C));
     double P = F / (3 * pow((S + 1 / S + 1), 2) * G * G);
     double Q = sqrt(1 + 2 * kFirstEccentricitySquared * kFirstEccentricitySquared * P);
-    double r_0 = -(P * kFirstEccentricitySquared * r) / (1 + Q)
-    + sqrt(
-           0.5 * kSemimajorAxis * kSemimajorAxis * (1 + 1.0 / Q)
-           - P * (1 - kFirstEccentricitySquared) * z * z / (Q * (1 + Q)) - 0.5 * P * r * r);
+    double r_0 = -(P * kFirstEccentricitySquared * r) / (1 + Q) + sqrt(0.5 * kSemimajorAxis * kSemimajorAxis * (1 + 1.0 / Q) - P * (1 - kFirstEccentricitySquared) * z * z / (Q * (1 + Q)) - 0.5 * P * r * r);
     double U = sqrt(pow((r - kFirstEccentricitySquared * r_0), 2) + z * z);
-    double V = sqrt(
-                    pow((r - kFirstEccentricitySquared * r_0), 2) + (1 - kFirstEccentricitySquared) * z * z);
+    double V = sqrt(pow((r - kFirstEccentricitySquared * r_0), 2) + (1 - kFirstEccentricitySquared) * z * z);
     double Z_0 = kSemiminorAxis * kSemiminorAxis * z / (kSemimajorAxis * V);
     *altitude = U * (1 - kSemiminorAxis * kSemiminorAxis / (kSemimajorAxis * V));
     *latitude = rad2Deg(atan((z + kSecondEccentricitySquared * Z_0) / r));
     *longitude = rad2Deg(atan2(y, x));
 }
 
-void GeodecticConverter::ecef2Ned(const double x, const double y, const double z, double* north, double* east,
-              double* down)
+void GeodecticConverter::ecef2Ned(
+    const double x,
+    const double y,
+    const double z,
+    double* north,
+    double* east,
+    double* down)
 {
     // Converts ECEF coordinate position into local-tangent-plane NED.
     // Coordinates relative to given ECEF coordinate frame.
@@ -105,8 +123,13 @@ void GeodecticConverter::ecef2Ned(const double x, const double y, const double z
     *down = -ret(2);
 }
 
-void GeodecticConverter::ned2Ecef(const double north, const double east, const double down, double* x, double* y,
-              double* z)
+void GeodecticConverter::ned2Ecef(
+    const double north,
+    const double east,
+    const double down,
+    double* x,
+    double* y,
+    double* z)
 {
     // NED (north/east/down) to ECEF coordinates
     Eigen::Vector3d ned, ret;
@@ -119,8 +142,13 @@ void GeodecticConverter::ned2Ecef(const double north, const double east, const d
     *z = ret(2) + _initial_ecef_z;
 }
 
-void GeodecticConverter::geodetic2Ned(const double latitude, const double longitude, const double altitude,
-                  double* north, double* east, double* down)
+void GeodecticConverter::geodetic2Ned(
+    const double latitude,
+    const double longitude,
+    const double altitude,
+    double* north,
+    double* east,
+    double* down)
 {
     // Geodetic position to local NED frame
     double x, y, z;
@@ -128,8 +156,13 @@ void GeodecticConverter::geodetic2Ned(const double latitude, const double longit
     ecef2Ned(x, y, z, north, east, down);
 }
 
-void GeodecticConverter::ned2Geodetic(const double north, const double east, const double down, double* latitude,
-                  double* longitude, double* altitude)
+void GeodecticConverter::ned2Geodetic(
+    const double north,
+    const double east,
+    const double down,
+    double* latitude,
+    double* longitude,
+    double* altitude)
 {
     // Local NED position to geodetic coordinates
     double x, y, z;
@@ -137,8 +170,13 @@ void GeodecticConverter::ned2Geodetic(const double north, const double east, con
     ecef2Geodetic(x, y, z, latitude, longitude, altitude);
 }
 
-void GeodecticConverter::geodetic2Enu(const double latitude, const double longitude, const double altitude,
-                  double* east, double* north, double* up)
+void GeodecticConverter::geodetic2Enu(
+    const double latitude,
+    const double longitude,
+    const double altitude,
+    double* east,
+    double* north,
+    double* up)
 {
     // Geodetic position to local ENU frame
     double x, y, z;
@@ -152,8 +190,13 @@ void GeodecticConverter::geodetic2Enu(const double latitude, const double longit
     *up = -aux_down;
 }
 
-void GeodecticConverter::enu2Geodetic(const double east, const double north, const double up, double* latitude,
-                  double* longitude, double* altitude)
+void GeodecticConverter::enu2Geodetic(
+    const double east,
+    const double north,
+    const double up,
+    double* latitude,
+    double* longitude,
+    double* altitude)
 {
     // Local ENU position to geodetic coordinates
 

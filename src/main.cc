@@ -40,7 +40,9 @@ int main(int argc, const char * argv[])
         while (std::getline(iss, token, ',')) {
             // process each token
             //std::cout << token.size() << " ";
+            std::cout << token << " " << std::endl;
         }
+        exit(0);
         //std::cout << std::endl;
     }
     dataFl.close();
@@ -48,3 +50,5 @@ int main(int argc, const char * argv[])
 
     return 0;
 }
+
+

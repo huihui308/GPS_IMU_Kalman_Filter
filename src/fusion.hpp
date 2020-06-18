@@ -25,13 +25,13 @@ using namespace geodectic_converter;
 class Fusion {
 private:
     const int _n = 6;
-    bool _initialized;
+    bool m_initialized;
     long long timestamp;
-    Eigen::MatrixXd _P;
-    Eigen::MatrixXd _Q;
-    Eigen::MatrixXd _F;
-    Eigen::MatrixXd _R;
-    EKF _KF;
+    Eigen::MatrixXd m_P;
+    Eigen::MatrixXd m_Q;
+    Eigen::MatrixXd m_F;
+    Eigen::MatrixXd m_R;
+    EKF m_KF;
 
     double _sGPS;
     double _sCourse;

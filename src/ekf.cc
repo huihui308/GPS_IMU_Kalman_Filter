@@ -18,12 +18,12 @@ void EKF::start(
 {
     _num_states = nin;
     _I = Eigen::MatrixXd::Identity(_num_states, _num_states);
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "    EKF: Number of states ->" << nin << "\n";
     }
     this->_state.resize(nin);
     this->_state = xin;
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "    EKF: Size of Input states ->" << xin.size() << "\n";
     }
     _P = Pin;
@@ -49,10 +49,10 @@ void EKF::updateJA(const double dt)
         ψ˙
         a
      *******************************************/
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "Updating JA: About to update state equations" << "\n";
     }
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "Updating JA: size of states" << this->_state.rows() << "x" <<this->_state.cols() << "\n";
     }
     // Updating state equations
@@ -83,27 +83,27 @@ void EKF::updateJA(const double dt)
         }
     } else {
         _state(0) = _state(0) + (_state(3)/_state(4)) * (sin(_state(4) * dt + _state(2)) - sin(_state(2)));
-        if (this->verbose) {
+        if ( this->verbose ) {
             std::cout << "Updating JA: state 0" << "\n";
         }
         _state(1) = _state(1) + (_state(3)/_state(4)) * (-cos(_state(4) * dt + _state(2)) + cos(_state(2)));
-        if (this->verbose) {
+        if ( this->verbose ) {
             std::cout << "Updating JA: state 1" << "\n";
         }
         _state(2) = std::fmod((_state(2) + _state(4) * dt + M_PI), (2.0 * M_PI)) - M_PI;
-        if (this->verbose) {
+        if ( this->verbose ) {
             std::cout << "Updating JA: state 2" << "\n";
         }
         _state(3) = _state(3) + _state(5) * dt;
-        if (this->verbose) {
+        if ( this->verbose ) {
             std::cout << "Updating JA: state 3" << "\n";
         }
         _state(4) = _state(4);
-        if (this->verbose) {
+        if ( this->verbose ) {
             std::cout << "Updating JA: state 4" << "\n";
         }
         _state(5) = _state(5);
-        if (this->verbose) {
+        if ( this->verbose ) {
             std::cout << "Updating JA: state 5" << "\n";
         }
     }

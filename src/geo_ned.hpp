@@ -21,16 +21,14 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 
-namespace geodectic_converter
-{
+namespace geodectic_converter {
     static double kSemimajorAxis = 6378137;
     static double kSemiminorAxis = 6356752.3142;
     static double kFirstEccentricitySquared = 6.69437999014 * 0.001;
     static double kSecondEccentricitySquared = 6.73949674228 * 0.001;
     static double kFlattening = 1 / 298.257223563;
 
-    class GeodecticConverter
-    {
+    class GeodecticConverter {
     public:
 
         GeodecticConverter();
@@ -41,8 +39,8 @@ namespace geodectic_converter
 
         void intializeReference(const double latitude, const double longitude, const double altitude);
 
-        void geodetic2Ecef(const double latitude, const double longitude, const double altitude, double* x,
-                           double* y, double* z);
+        void geodetic2Ecef(const double latitude, const double longitude, const double altitude, double* x, double* y, double* z);
+
         void ecef2Geodetic(const double x, const double y, const double z, double* latitude,
                            double* longitude, double* altitude);
         void ecef2Ned(const double x, const double y, const double z, double* north, double* east, double* down);
@@ -56,6 +54,7 @@ namespace geodectic_converter
         void geodetic2Enu(const double latitude, const double longitude, const double altitude, double* east, double* north, double* up);
 
         void enu2Geodetic(const double east, const double north, const double up, double* latitude, double* longitude, double* altitude);
+
     private:
         bool _have_reference;
         double _initial_latitude;
