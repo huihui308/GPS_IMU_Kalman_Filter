@@ -12,11 +12,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 include_directories(headers)
 
-set(SOURCES src/ekf.cpp
-            src/fusion.cpp
-            src/geo_ned.cpp
-            src/run_fusion.cpp
-            src/utils.cpp
-            src/main.cpp)
+set(SOURCES src/ekf.cc
+            src/utils.cc
+            src/fusion.cc
+            src/geo_ned.cc
+            src/run_fusion.cc
+            src/main.cc)
 
 add_executable(${prjName} ${SOURCES})
