@@ -7,16 +7,17 @@
 
 // Read these parameters from the file
 struct EKFParams {
-    double varGPS, varSpeed, varYaw, varAcc, maxAccel, maxTurnRate, maxYawAccel, xOff, yOff;
+    double varGPS, varSpeed, varYaw, varAcc;
+    double maxAccel, maxTurnRate, maxYawAccel;
+    double xOff, yOff;
 };
 
 
 /**
- * @brief Class with the highest level of abstraction for the GPS INS estimation system. Uses D      ataPoint and Fusion
+ * @brief Class with the highest level of abstraction for the GPS INS estimation system. Uses DataPoint and Fusion
  * classes to perform filtering and state estimation on the robot.
  */
-class GpsIns
-{
+class GpsIns {
 public:
     GpsIns(bool verbose = false);
     ~GpsIns();
@@ -36,8 +37,8 @@ private:
     clock_t _cur_time;
     clock_t _prev_time;
 
-    int _imucounter, _gpscounter, _enccounter;
-    int _prev_imu_counter, _prev_gps_counter, _prev_enc_counter;
+    int32_t _imucounter, _gpscounter, _enccounter;
+    int32_t _prev_imu_counter, _prev_gps_counter, _prev_enc_counter;
     std::mutex m;
     DataPointType _data_type;
     Eigen::VectorXd _raw_data;

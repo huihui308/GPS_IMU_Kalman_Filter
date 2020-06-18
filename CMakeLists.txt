@@ -22,3 +22,9 @@ set(SOURCES src/ekf.cc
             src/main.cc)
 
 add_executable(${prjName} ${SOURCES})
+
+
+target_link_libraries(${prjName} libglog.a)
+target_link_libraries(${prjName} pthread)
+
+

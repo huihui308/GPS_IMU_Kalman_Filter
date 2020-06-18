@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iostream>
 #include "fusion.hpp"
+#include "run_fusion.hpp"
+#include "glog/logging.h"
 
 
 int main(int argc, const char * argv[])
@@ -21,16 +23,17 @@ int main(int argc, const char * argv[])
     }
 
     std::string str;
-    std::string ax;
-    std::string yaw;
-    std::string lat;
-    std::string lon;
     std::string course;
+    std::string ax, yaw;
+    std::string lat, lon;
     std::string yaw_rate;
     std::string timestamp;
+    GpsIns gpsIns(true);
 
     std::getline(dataFl, str); // Skip the first line
+    LOG(INFO) << str;
     while (std::getline(dataFl, str)) {
+        //LOG(INFO) << str;
         std::istringstream iss(str);
         std::string token;
 
@@ -41,6 +44,7 @@ int main(int argc, const char * argv[])
         //std::cout << std::endl;
     }
     dataFl.close();
+    LOG(INFO) << "End------";
 
     return 0;
 }

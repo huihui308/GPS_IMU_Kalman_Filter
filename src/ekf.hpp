@@ -5,7 +5,6 @@
 //  Created by Karan on 4/7/18.
 //  Copyright © 2018 Karan. All rights reserved.
 //
-
 #ifndef ekf_hpp
 #define ekf_hpp
 
@@ -13,13 +12,13 @@
 #include "utils.hpp"
 #include "Eigen/Dense"
 
+
 /**
  * @brief EKF base class implementing generic Extended Kalman Filter
  */
-class EKF
-{
-public:
+class EKF {
 
+public:
     /**
      * @brief Default constructor
      */
@@ -39,7 +38,12 @@ public:
      * @param Fin Initial Jacobian of the state
      * @param Qin Initial Q matrix
      */
-    void start(const int nin, const Eigen::VectorXd& xin, const Eigen::MatrixXd& Pin, const Eigen::MatrixXd& Fin, const Eigen::MatrixXd& Qin);
+    void start(
+        const int nin,
+        const Eigen::VectorXd& xin,
+        const Eigen::MatrixXd& Pin,
+        const Eigen::MatrixXd& Fin,
+        const Eigen::MatrixXd& Qin);
 
     /**
      * @brief set Q value for the filter
@@ -77,6 +81,7 @@ public:
      * @param R Measurement noise
      */
     void update(const Eigen::VectorXd& Z, const Eigen::VectorXd& Hx, const Eigen::MatrixXd &JH, const Eigen::MatrixXd &R);
+
 private:
     // Flag to indicate if the filter has started
     bool _init;

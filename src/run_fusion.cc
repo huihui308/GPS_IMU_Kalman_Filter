@@ -18,7 +18,7 @@ static inline EKFParams
 getDefaultParams(void)
 {
     EKFParams params;
-    ParameterReader pd;
+    ParameterReader pd("./../src/parameters.txt");
 
     params.varGPS = atof(pd.getData( "vargps" ).c_str());
     params.varSpeed = atof(pd.getData( "varspeed" ).c_str());
@@ -49,7 +49,7 @@ GpsIns::GpsIns(bool verbose)
     } catch (const ifstream::failure& e) {
         cout << "Exception opening/reading parameter file";
     }
-
+    //------
     _raw_data = Eigen::VectorXd(6);
     filter = new Fusion(params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc, params.xOff, params.yOff, verbose);
 
@@ -64,10 +64,11 @@ GpsIns::GpsIns(bool verbose)
     _prev_time = clock();
     _cur_time = 0;
     this->verbose = verbose;
-    if(this->verbose) std::cout << "	GPS-INS: finished Initializing Constructor" << "\n";
+    if (this->verbose) {
+        std::cout << "  GPS-INS: finished Initializing Constructor" << "\n";
+    }
     if (this->verbose) {
         std::printf("EKF Params Initialized:\r\n	maxAccel = %.3f\r\n	maxTurnRate = %.3f\r\n	maxYawAccel = %.3f\r\n	varGPS = %.3f\r\n	varSpeed = %.3f\r\n	 varYaw = %.3f\r\n	varAcc = %.3f\r\n", params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc);
-
     }
 }
 
@@ -75,7 +76,12 @@ GpsIns::GpsIns(bool verbose)
  * @brief Default destructor
  */
 GpsIns::~GpsIns()
-{}
+{
+    if (nullptr != _sensor_data) {
+        free(_sensor_data);
+        _sensor_data = nullptr;
+    }
+}
 
 /**
  * @brief Reads in the GPS data
@@ -162,21 +168,21 @@ void GpsIns::read_encoders(double vel)
  */
 void GpsIns::set_data()
 {
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "  GPS-INS: Setting data" << "\n";
     }
     bool flag = (_gpscounter > _prev_gps_counter);
     // iF gps got updated then we update the filter else we just predict
-    if(flag) {
+    if ( flag ) {
         _data_type = DataPointType::GPS;
     } else {
         _data_type = DataPointType::IMU;
     }
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "  GPS-INS: delta Time used --- " << (float)_dt << "\n";
     }
     _sensor_data->set(_dt, _data_type, _raw_data);
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "  GPS-INS: Data set" << "\n";
     }
 }
@@ -208,3 +214,5 @@ DataPoint GpsIns::get_sensor_data()
 {
     return *_sensor_data;
 }
+
+

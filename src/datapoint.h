@@ -74,12 +74,12 @@ public:
     long long get_timestamp() const;
 
 private:
-    double _x;
-    double _y;
-    double _z;
-    double _north;
-    double _east;
-    double _down;
+    double _x;          // lat
+    double _y;          // lon
+    double _z;          // vel
+    double _north;      // yaw_rate
+    double _east;       // long_accel
+    double _down;       // alt
     GeodecticConverter GPSDataConverter;
     bool _initialized;
     bool _first_data_point;

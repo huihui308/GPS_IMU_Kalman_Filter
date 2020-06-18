@@ -46,8 +46,8 @@ private:
     // GPS offsets
     double _xOffset, _yOffset;
     bool verbose;
-public:
 
+public:
     /**
      * @brief Constructor
      *
@@ -55,8 +55,17 @@ public:
      * @param max_turn_rate System parameter specifying maximum turn rate
      * @param max_yaw_accel System parameter specifying max yaw acceleration
      */
-    Fusion(double max_acceleration, double max_turn_rate, double max_yaw_accel, double varGPS,
-    double varSpeed, double varYaw, double varAcc, double xOffset, double yOffset, bool verbose);
+    Fusion(
+        double max_acceleration,
+        double max_turn_rate,
+        double max_yaw_accel,
+        double varGPS,
+        double varSpeed,
+        double varYaw,
+        double varAcc,
+        double xOffset,
+        double yOffset,
+        bool verbose);
 
     /**
      * @brief Updates the Q matrix

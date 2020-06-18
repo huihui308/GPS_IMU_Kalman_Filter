@@ -18,7 +18,6 @@ public:
 
     std::string getData(std::string key);
 
-public:
     std::map<std::string, std::string> data;
 };
 

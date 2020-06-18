@@ -22,13 +22,13 @@ ParameterReader::ParameterReader(string filename)
     while( !fin.eof() ) {
         cout << "------ Reading in Parameter File...\r\n";
         string str;
-        getline( fin, str );
+        getline(fin, str);
         cout << "   Line Read: " << str << endl;
         if (str[0] == '#') {
             continue;
         }
 
-        int pos = str.find("=");
+        int32_t pos = str.find("=");
         if (pos == -1) {
             cout << "pos found = -1 ---- Continuing loop...\r\n";
             continue;
@@ -62,6 +62,5 @@ string ParameterReader::getData(string key)
 
     return iter->second;
 }
-
 
 
