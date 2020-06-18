@@ -13,13 +13,15 @@
 
 int main(int argc, const char * argv[])
 {
-    std::ifstream ip("/Users/karan/Desktop/EKF/EKF/Data.csv");
-    if(!ip.is_open())
-    {
-        std::cerr << "Failed to open the data file";
+    std::string dataCsv = "./../src/data.csv";
+
+
+    std::ifstream dataFl(dataCsv);
+    if ( !dataFl.is_open() ) {
+        std::cerr << "Failed to open the data file " << dataCsv;
         std::exit(EXIT_FAILURE);
     }
-    
+
     std::string timestamp;
     std::string ax;
     std::string yaw_rate;
@@ -27,15 +29,15 @@ int main(int argc, const char * argv[])
     std::string course;
     std::string lat;
     std::string lon;
-    
+
     std::string str;
-    std::getline(ip, str); // Skip the first line
-    
-    while(std::getline(ip, str))
+    std::getline(dataFl, str); // Skip the first line
+
+    while(std::getline(dataFl, str))
     {
         std::istringstream iss(str);
         std::string token;
-        
+
         while (std::getline(iss, token, ','))
         {
             // process each token
@@ -43,8 +45,8 @@ int main(int argc, const char * argv[])
         }
         std::cout << std::endl;
     }
-    
-    ip.close();
-    
+
+    dataFl.close();
+
     return 0;
 }

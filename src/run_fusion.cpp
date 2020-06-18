@@ -6,7 +6,7 @@
 // Copyright � 2018 Karan. All rights reserved.
 
 #include "fusion.hpp"
-#include "csv_reader.hpp"
+//#include "csv_reader.hpp"
 #include "run_fusion.hpp"
 #include <eigen3/Eigen/Dense>
 

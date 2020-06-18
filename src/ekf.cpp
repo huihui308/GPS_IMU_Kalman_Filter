@@ -72,7 +72,8 @@ void EKF::updateJA(const double dt)
 
     if(this->verbose) std::cout << "Updating JA: About to calculate jacobian" << "\n";
     // Calculate jacobian
-   _JA =  calculate_jacobian(_state, dt);
+    //_JA =  calculate_jacobian(_state, dt);
+    _JA = calculate_joacobian(_state, dt);
 }
 
 void EKF::predict()

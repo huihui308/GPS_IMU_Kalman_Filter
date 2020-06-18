@@ -10,12 +10,14 @@
 #define fusion_hpp
 
 #include <stdio.h>
-#include "lib/Eigen/Dense"
+#include <iostream>
 #include "ekf.hpp"
 #include "geo_ned.hpp"
-#include <iostream>
+#include "Eigen/Dense"
+
 
 using namespace geodectic_converter;
+
 
 //Input data format assumed as - latitude, longitude, vel, psi_dot, accel, alt
 
