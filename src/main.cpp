@@ -13,7 +13,7 @@
 
 int main(int argc, const char * argv[])
 {
-    std::string dataCsv = "./../src/data.csv";
+    std::string dataCsv = "./../data/data.csv";
 
 
     std::ifstream dataFl(dataCsv);
