@@ -4,11 +4,35 @@
 //
 // Created by Karan on 5/2/18.
 // Copyright � 2018 Karan. All rights reserved.
-
-#include "fusion.hpp"
-//#include "csv_reader.hpp"
-#include "run_fusion.hpp"
 #include <eigen3/Eigen/Dense>
+#include "fusion.hpp"
+#include "run_fusion.hpp"
+#include "parameterReader.h"
+//#include "csv_reader.hpp"
+
+
+using namespace std;
+
+
+static inline EKFParams
+getDefaultParams(void)
+{
+    EKFParams params;
+    ParameterReader pd;
+
+    params.varGPS = atof(pd.getData( "vargps" ).c_str());
+    params.varSpeed = atof(pd.getData( "varspeed" ).c_str());
+    params.varYaw = atof(pd.getData( "varyaw" ).c_str());
+    params.varAcc = atof(pd.getData( "varaccel" ).c_str());
+    params.maxAccel = atof(pd.getData( "maxaccel" ).c_str());
+    params.maxTurnRate = atof(pd.getData( "maxturnrate" ).c_str());
+    params.maxYawAccel = atof(pd.getData( "maxyawaccel" ).c_str());
+    params.xOff = atof(pd.getData("xOff").c_str());
+    params.yOff = atof(pd.getData("yOff").c_str());
+
+    return params;
+}
+
 
 /**
  * @brief Constructor for the main class
@@ -20,18 +44,14 @@
  */
 GpsIns::GpsIns(bool verbose)
 {
-	try
-    {
+    try {
         params = getDefaultParams();
-    }
-    catch (const ifstream::failure& e)
-    {
+    } catch (const ifstream::failure& e) {
         cout << "Exception opening/reading parameter file";
-     }
+    }
 
     _raw_data = Eigen::VectorXd(6);
-    filter = new Fusion(params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS,
-                        params.varSpeed, params.varYaw, params.varAcc, params.xOff, params.yOff, verbose);
+    filter = new Fusion(params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc, params.xOff, params.yOff, verbose);
 
     _sensor_data = new DataPoint(verbose);
     _prev_enc_counter = 0;
@@ -45,8 +65,8 @@ GpsIns::GpsIns(bool verbose)
     _cur_time = 0;
     this->verbose = verbose;
     if(this->verbose) std::cout << "	GPS-INS: finished Initializing Constructor" << "\n";
-    if(this->verbose){
-	    std::printf("EKF Params Initialized:\r\n	maxAccel = %.3f\r\n	maxTurnRate = %.3f\r\n	maxYawAccel = %.3f\r\n	varGPS = %.3f\r\n	varSpeed = %.3f\r\n	 varYaw = %.3f\r\n	varAcc = %.3f\r\n", params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc);
+    if (this->verbose) {
+        std::printf("EKF Params Initialized:\r\n	maxAccel = %.3f\r\n	maxTurnRate = %.3f\r\n	maxYawAccel = %.3f\r\n	varGPS = %.3f\r\n	varSpeed = %.3f\r\n	 varYaw = %.3f\r\n	varAcc = %.3f\r\n", params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc);
 
     }
 }
@@ -62,16 +82,22 @@ GpsIns::~GpsIns()
  */
 void GpsIns::read_gps_data(double lat, double lon, double alt)
 {
-	if(this->verbose) std::cout << "	GPS-INS: In Read GPS" << "\n";
-	//m.lock();
+    if (this->verbose) {
+        std::cout << "  GPS-INS: In Read GPS" << "\n";
+    }
+    //m.lock();
     std::lock_guard<std::mutex> lock(m);
-	_raw_data(0) = lat;
-	_raw_data(1) = lon;
-	_raw_data(5) = alt;
-	_gpscounter += 1;
-	//m.unlock();
-	if(this->verbose) std::cout << "	GPS-INS: Raw GPS data --- " << _raw_data << "\n";
-	if(this->verbose) std::cout << "	GPS-INS: Exiting read GPS" << "\n";
+    _raw_data(0) = lat;
+    _raw_data(1) = lon;
+    _raw_data(5) = alt;
+    _gpscounter += 1;
+    //m.unlock();
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Raw GPS data --- " << _raw_data << "\n";
+    }
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Exiting read GPS" << "\n";
+    }
 }
 
 /**
@@ -84,21 +110,29 @@ void GpsIns::read_gps_data(double lat, double lon, double alt)
  */
 void GpsIns::read_imu_data(double yaw_rate, double long_accel)
 {
-	if(this->verbose) std::cout << "	GPS-INS: In Read IMU" << "\n";
-	//m.lock();
+    if (this->verbose) {
+        std::cout << "  GPS-INS: In Read IMU" << "\n";
+    }
+    //m.lock();
     std::lock_guard<std::mutex> lock(m);
-	this->_cur_time = clock();
-	this->_dt = _cur_time - _prev_time;
+    this->_cur_time = clock();
+    this->_dt = _cur_time - _prev_time;
 
-	_raw_data(3) = yaw_rate;
-	_raw_data(4) = long_accel;
-	_imucounter += 1;
+    _raw_data(3) = yaw_rate;
+    _raw_data(4) = long_accel;
+    _imucounter += 1;
 
-	// update previous time only if dt > 0
-	if(_dt > 0.0) this->_prev_time = _cur_time;
-	//m.unlock();
-	if(this->verbose) std::cout << "	GPS-INS: IMU Data -- " << _raw_data << "\n";
-	if(this->verbose) std::cout << "	GPS-INS: Exiting read IMU" << "\n";
+    // update previous time only if dt > 0
+    if (_dt > 0.0)  {
+        this->_prev_time = _cur_time;
+    }
+    //m.unlock();
+    if (this->verbose) {
+        std::cout << "  GPS-INS: IMU Data -- " << _raw_data << "\n";
+    }
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Exiting read IMU" << "\n";
+    }
 }
 
 /**
@@ -109,13 +143,17 @@ void GpsIns::read_imu_data(double yaw_rate, double long_accel)
  */
 void GpsIns::read_encoders(double vel)
 {
-    if(this->verbose) std::cout << "	GPS-INS: Read encoder" << "\n";
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Read encoder" << "\n";
+    }
     //m.lock();
     std::lock_guard<std::mutex> lock(m);
     _raw_data(2) = vel;
     _enccounter += 1;
     //m.unlock();
-    if(this->verbose) std::cout << "	GPS-INS: Exiting Read encoder" << "\n";
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Exiting Read encoder" << "\n";
+    }
 }
 
 /**
@@ -124,19 +162,23 @@ void GpsIns::read_encoders(double vel)
  */
 void GpsIns::set_data()
 {
-    if(this->verbose) std::cout << "	GPS-INS: Setting data" << "\n";
-
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Setting data" << "\n";
+    }
     bool flag = (_gpscounter > _prev_gps_counter);
     // iF gps got updated then we update the filter else we just predict
-    if(flag)
+    if(flag) {
         _data_type = DataPointType::GPS;
-    else
+    } else {
         _data_type = DataPointType::IMU;
-
-    if(this->verbose) std::cout << "	GPS-INS: delta Time used --- " << (float)_dt << "\n";
+    }
+    if (this->verbose) {
+        std::cout << "  GPS-INS: delta Time used --- " << (float)_dt << "\n";
+    }
     _sensor_data->set(_dt, _data_type, _raw_data);
-    if(this->verbose) std::cout << "	GPS-INS: Data set" << "\n";
-
+    if (this->verbose) {
+        std::cout << "  GPS-INS: Data set" << "\n";
+    }
 }
 
 /**

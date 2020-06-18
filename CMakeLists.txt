@@ -18,6 +18,7 @@ set(SOURCES src/ekf.cc
             src/geo_ned.cc
             src/datapoint.cc
             src/run_fusion.cc
+            src/parameterReader.cc
             src/main.cc)
 
 add_executable(${prjName} ${SOURCES})

@@ -5,7 +5,6 @@
 //  Created by Karan on 4/7/18.
 //  Copyright © 2018 Karan. All rights reserved.
 //
-
 #include "ekf.hpp"
 #include <iostream>
 
