@@ -16,7 +16,7 @@
 using namespace geodectic_converter;
 
 
-//Input data format assumed as - latitude, longitude, vel, psi_dot, accel, alt
+// Input data format assumed as - latitude, longitude, vel, psi_dot, accel, alt
 
 enum class DataPointType {
     IMU, GPS
@@ -30,20 +30,7 @@ public:
     /**
      * @brief Default constructor
      */
-    DataPoint(bool verbose = false)
-    :_initialized(false), _first_data_point(true)
-    {
-        _dx = 0;
-        _dy = 0;
-        _mx = 0;
-        _my = 0;
-        _ds = 0;
-
-        _RadiusEarth = 6378388.0; //m
-        _arc = 2.0 * M_PI * (_RadiusEarth + 230)/360.0; // degree
-       this->verbose = verbose;
-       if(this->verbose) std::cout << "     DATAPOINT: ----- Initialized.....\r\n";
-    }
+    DataPoint(bool verbose);
 
     /**
      * @brief Retrieves raw sensor data and stores it in private variables
@@ -63,52 +50,28 @@ public:
      *
      * @return Sensor data measurements
      */
-    Eigen::VectorXd get_state() const
-    {
-        Eigen::VectorXd state(6);
-
-        // Convert raw data to fusion readable states
-        double x = _mx;
-        double y = _my;
-        double vel = _raw_data(2);
-        double psi = 0;
-        double psi_dot = _raw_data(3);
-        double a = _raw_data(4);
-
-        state << x, y, psi, vel, psi_dot, a;
-
-        return state;
-    }
+    Eigen::VectorXd get_state() const;
 
     /**
      * @brief Get raw sensor data
      *
      * @return Raw sensor data
      */
-    Eigen::VectorXd get_raw_data() const
-    {
-        return _raw_data;
-    }
+    Eigen::VectorXd get_raw_data() const;
 
     /**
      * @brief Get data type associated with the data at current timestep
      *
      * @return Data type: Either GPS or IMU
      */
-    DataPointType get_data_point_type() const
-    {
-        return _data_type;
-    }
+    DataPointType get_data_point_type() const;
 
     /**
      * @brief Get current timestamp
      *
      * @return Timestamp associated with current data
      */
-    long long get_timestamp() const
-    {
-        return _timestamp;
-    }
+    long long get_timestamp() const;
 
 private:
     double _x;
@@ -138,10 +101,6 @@ private:
     double _arc;
     bool verbose;
 };
-
-
-
-
 
 
 #endif /* _DATAPOINT_ */
