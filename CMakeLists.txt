@@ -16,6 +16,7 @@ set(SOURCES src/ekf.cc
             src/utils.cc
             src/fusion.cc
             src/geo_ned.cc
+            src/datapoint.cc
             src/run_fusion.cc
             src/main.cc)
 

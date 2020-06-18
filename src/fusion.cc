@@ -7,6 +7,8 @@
 //
 #include <iostream>
 #include "fusion.hpp"
+#include "datapoint.h"
+
 
 Fusion::Fusion(double max_acceleration, double max_turn_rate, double max_yaw_accel, double varGPS,
     double varSpeed, double varYaw, double varAcc, double xOffset, double yOffset, bool verbose)
