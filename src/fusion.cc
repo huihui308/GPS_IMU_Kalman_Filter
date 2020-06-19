@@ -94,13 +94,15 @@ void Fusion::compute(const DataPoint &data)
     // Assuming 1.e6 for timestamp - confirm after running on the system
     const double dt = (data.get_timestamp())/ 1.e6;
     // const double dt = 0.1;
-    if(this->verbose) std::cout << dt << "timestep in compute";
+    if (this->verbose) {
+        std::cout << dt << "timestep in compute";
+    }
     _timestamp = data.get_timestamp();
 
     // Update Q
     this->updateQ(dt);
     // Update state and calculate jacobian
-    m_KF.updateJA(dt);
+    m_KF.updateFj(dt);
     // Prediction
     m_KF.predict();
 
@@ -155,9 +157,9 @@ void Fusion::compute(const DataPoint &data)
     }
 }
 
-void Fusion::process(const DataPoint &data)
+void Fusion::process(const DataPoint& data)
 {
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "    Fusion: ------ In process.....\r\n";
     }
     if (0.0 < data.get_timestamp()) {

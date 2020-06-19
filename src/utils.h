@@ -11,6 +11,6 @@
 
 #include "Eigen/Dense"
 
-Eigen::MatrixXd calculate_joacobian(const Eigen::VectorXd& v, const double dt);
+
 
 #endif /* utils_hpp */

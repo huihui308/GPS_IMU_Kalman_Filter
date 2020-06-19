@@ -16,115 +16,121 @@ void EKF::start(
     const Eigen::MatrixXd& Fin,
     const Eigen::MatrixXd& Qin)
 {
-    _num_states = nin;
-    _I = Eigen::MatrixXd::Identity(_num_states, _num_states);
+    m_num_states = nin;
+    m_I = Eigen::MatrixXd::Identity(m_num_states, m_num_states);
     if ( this->verbose ) {
         std::cout << "    EKF: Number of states ->" << nin << "\n";
     }
-    this->_state.resize(nin);
-    this->_state = xin;
+    this->m_state.resize(nin);
+    this->m_state = xin;
     if ( this->verbose ) {
         std::cout << "    EKF: Size of Input states ->" << xin.size() << "\n";
     }
-    _P = Pin;
-    _JA = Fin;
-    _Q = Qin;
+    m_P = Pin;
+    m_Fj = Fin;
+    m_Q = Qin;
 
     return;
 }
 
-void EKF::setQ(const Eigen::MatrixXd &Q_in)
+void EKF::setQ(const Eigen::MatrixXd& Q_in)
 {
-    _Q = Q_in;
+    m_Q = Q_in;
 }
 
-void EKF::updateJA(const double dt)
+Eigen::MatrixXd calculate_joacobian(
+    const Eigen::VectorXd& v,
+    const double dt)
 {
-    /*******************************************
-     * State Equation Update Rule
-        x + v/ψ˙(−sin(ψ) + sin(dtψ˙+ψ))
-        y + v/ψ˙(cos(ψ) − cos(dtψ˙+ψ))
-        dtψ˙+ ψ
-        dta + vψ˙
-        ψ˙
-        a
-     *******************************************/
+    // Assumes Jacobian is 6 x 6
+    Eigen::MatrixXd JA = Eigen::MatrixXd::Zero(6, 6);
+    // Assumes the size of input vector is 6
+    const double psi = v(2);
+    const double velocity = v(3);
+    const double psi_dot = v(4);
+    const double THRESHOLD = 0.001;
+
+    // Avoid dividing by zero
+    if (THRESHOLD > psi_dot) {
+        return JA;
+    }
+    //------
+    const double turn_radius = (velocity/psi_dot);
+    const double psi_dot_inverse = 1/psi_dot;
+    const double pdotp = dt * psi_dot + psi;
+
+    const double a13 = turn_radius * (cos(dt * psi_dot + psi) - cos(psi));
+    const double a14 = psi_dot_inverse * (sin(psi_dot*dt + psi) - sin(psi));
+    const double a15 = dt * turn_radius * cos(pdotp) - (velocity/(pow(psi_dot, 2)))*(sin(pdotp) -sin(psi));
+
+    const double a23 = turn_radius * (-sin(psi) + sin(pdotp));
+    const double a24 = psi_dot_inverse * (cos(psi) - cos(pdotp));
+    const double a25 = dt * turn_radius * sin(pdotp) - (velocity/(pow(psi_dot, 2))) * (cos(psi) - cos(pdotp));
+
+    JA <<
+        1.0, 0.0, a13, a14, a15, 0.0,
+        0.0, 1.0, a23, a24, a25, 0.0,
+        0.0, 0.0, 1.0, 0.0, dt,  0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0,  dt,
+        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ;
+
+    return JA;
+}
+
+/*******************************************
+ * State Equation Update Rule
+    x + v/ψ˙(−sin(ψ) + sin(dtψ˙+ψ))
+    y + v/ψ˙(cos(ψ) − cos(dtψ˙+ψ))
+    dtψ˙+ ψ
+    dta + vψ˙
+    ψ˙
+    a
+ *******************************************/
+void EKF::updateFj(const double dt)
+{
     if ( this->verbose ) {
-        std::cout << "Updating JA: About to update state equations" << "\n";
+        std::cout << "Updating Fj: About to update state equations" << "\n";
     }
     if ( this->verbose ) {
-        std::cout << "Updating JA: size of states" << this->_state.rows() << "x" <<this->_state.cols() << "\n";
+        std::cout << "Updating Fj: size of states" << this->m_state.rows() << "x" << this->m_state.cols() << "\n";
     }
     // Updating state equations
-    if (fabs(_state(4)) < 0.01) {
-        _state(0) = _state(0) + (_state(3) * dt) * cos(_state(2));
-        if (this->verbose) {
-            std::cout << "Updating JA: state 0" << "\n";
-        }
-        _state(1) = _state(1) + (_state(3) * dt) * sin(_state(2));
-        if (this->verbose) {
-            std::cout << "Updating JA: state 1" << "\n";
-        }
-        _state(2) = _state(2);
-        if (this->verbose) {
-            std::cout << "Updating JA: state 2" << "\n";
-        }
-        _state(3) = _state(3) + _state(5) * dt;
-        if (this->verbose) {
-            std::cout << "Updating JA: state 3" << "\n";
-        }
-        _state(4) = 0.0000001;
-        if (this->verbose) {
-            std::cout << "Updating JA: state 4" << "\n";
-        }
-        _state(5) = _state(5);
-        if (this->verbose) {
-            std::cout << "Updating JA: state 5" << "\n";
-        }
+    if (0.0001 > fabs(m_state(4))) {
+        // Driving straight
+        m_state(0) = m_state(0) + (m_state(3) * dt) * cos(m_state(2));
+        m_state(1) = m_state(1) + (m_state(3) * dt) * sin(m_state(2));
+        m_state(2) = m_state(2);
+        m_state(3) = m_state(3) + m_state(5) * dt;
+        m_state(4) = 0.0000001;     // avoid numerical issues in Jacobians
+        m_state(5) = m_state(5);
     } else {
-        _state(0) = _state(0) + (_state(3)/_state(4)) * (sin(_state(4) * dt + _state(2)) - sin(_state(2)));
-        if ( this->verbose ) {
-            std::cout << "Updating JA: state 0" << "\n";
-        }
-        _state(1) = _state(1) + (_state(3)/_state(4)) * (-cos(_state(4) * dt + _state(2)) + cos(_state(2)));
-        if ( this->verbose ) {
-            std::cout << "Updating JA: state 1" << "\n";
-        }
-        _state(2) = std::fmod((_state(2) + _state(4) * dt + M_PI), (2.0 * M_PI)) - M_PI;
-        if ( this->verbose ) {
-            std::cout << "Updating JA: state 2" << "\n";
-        }
-        _state(3) = _state(3) + _state(5) * dt;
-        if ( this->verbose ) {
-            std::cout << "Updating JA: state 3" << "\n";
-        }
-        _state(4) = _state(4);
-        if ( this->verbose ) {
-            std::cout << "Updating JA: state 4" << "\n";
-        }
-        _state(5) = _state(5);
-        if ( this->verbose ) {
-            std::cout << "Updating JA: state 5" << "\n";
-        }
+        // otherwise
+        m_state(0) = m_state(0) + (m_state(3)/m_state(4)) * (sin(m_state(4) * dt + m_state(2)) - sin(m_state(2)));
+        m_state(1) = m_state(1) + (m_state(3)/m_state(4)) * (-cos(m_state(4) * dt + m_state(2)) + cos(m_state(2)));
+        m_state(2) = std::fmod((m_state(2) + m_state(4) * dt + M_PI), (2.0 * M_PI)) - M_PI;
+        m_state(3) = m_state(3) + m_state(5) * dt;
+        m_state(4) = m_state(4);    // Constant Turn Rate
+        m_state(5) = m_state(5);    // Constant Acceleration
     }
 
     if (this->verbose) {
-        std::cout << "Updating JA: About to calculate jacobian" << "\n";
+        std::cout << "Updating Fj: About to calculate jacobian" << "\n";
     }
     // Calculate jacobian
-    //_JA =  calculate_jacobian(_state, dt);
-    _JA = calculate_joacobian(_state, dt);
+    //m_Fj =  calculate_jacobian(m_state, dt);
+    m_Fj = calculate_joacobian(m_state, dt);
 }
 
+// Prediction step
 void EKF::predict()
 {
-    // Prediction step
-    _P = _JA * _P * _JA.transpose() + _Q;
+    m_P = m_Fj * m_P * m_Fj.transpose() + m_Q;
 }
 
 void EKF::update(const Eigen::VectorXd& Z, const Eigen::VectorXd& Hx, const Eigen::MatrixXd &JH, const Eigen::MatrixXd &R)
 {
-    Eigen::MatrixXd JHT = _P * JH.transpose();
+    Eigen::MatrixXd JHT = m_P * JH.transpose();
     // Temporary variable for storing this intermediate value
     Eigen::MatrixXd _S = JH * JHT  + R;
     // Compute the Kalman gain
@@ -132,12 +138,12 @@ void EKF::update(const Eigen::VectorXd& Z, const Eigen::VectorXd& Hx, const Eige
     // Update the estimate
     Eigen::VectorXd y = Z - Hx;
 
-    _state = _state + _K * y;
+    m_state = m_state + _K * y;
     // Update the error covariance
-    _P = (_I - _K * JH) * _P;
+    m_P = (m_I - _K * JH) * m_P;
 }
 
 Eigen::VectorXd EKF::get_resulting_state() const
 {
-    return _state;
+    return m_state;
 }

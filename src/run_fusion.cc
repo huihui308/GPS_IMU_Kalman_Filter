@@ -64,10 +64,10 @@ GpsIns::GpsIns(bool verbose)
     _prev_time = clock();
     _cur_time = 0;
     this->verbose = verbose;
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "  GPS-INS: finished Initializing Constructor" << "\n";
     }
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::printf("EKF Params Initialized:\r\n	maxAccel = %.3f\r\n	maxTurnRate = %.3f\r\n	maxYawAccel = %.3f\r\n	varGPS = %.3f\r\n	varSpeed = %.3f\r\n	 varYaw = %.3f\r\n	varAcc = %.3f\r\n", params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc);
     }
 }
@@ -89,7 +89,7 @@ GpsIns::~GpsIns()
 void GpsIns::read_gps_data(double lat, double lon, double alt)
 {
     if (this->verbose) {
-        std::cout << "  GPS-INS: In Read GPS" << "\n";
+        std::cout << "  GPS-INS: In Read GPS" << std::endl;
     }
     //m.lock();
     std::lock_guard<std::mutex> lock(m);
@@ -98,10 +98,10 @@ void GpsIns::read_gps_data(double lat, double lon, double alt)
     _raw_data(5) = alt;
     _gpscounter += 1;
     //m.unlock();
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "  GPS-INS: Raw GPS data --- " << _raw_data << "\n";
     }
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "  GPS-INS: Exiting read GPS" << "\n";
     }
 }

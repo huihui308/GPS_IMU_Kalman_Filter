@@ -39,7 +39,7 @@ public:
      * @param Qin Initial Q matrix
      */
     void start(
-        const int nin,
+        const int32_t nin,
         const Eigen::VectorXd& xin,
         const Eigen::MatrixXd& Pin,
         const Eigen::MatrixXd& Fin,
@@ -65,7 +65,7 @@ public:
      * @param dt Time interval over which the integration takes place. Usually the difference between the previous and
      * current time step
      */
-    void updateJA(const double dt);
+    void updateFj(const double dt);
 
     /**
      * @brief Updates the state covairance matrix and adds process noise
@@ -86,17 +86,17 @@ private:
     // Flag to indicate if the filter has started
     bool _init;
     bool verbose;
-    int _num_states; // Number of states in the EKF
+    int32_t m_num_states; // Number of states in the EKF
 
-    Eigen::MatrixXd _P; // initial covaraince/uncertainity in states
-    Eigen::MatrixXd _Q; // process noise covariance
+    Eigen::MatrixXd m_P;    // initial covaraince/uncertainity in states
+    Eigen::MatrixXd m_Q;    // process noise covariance
     Eigen::MatrixXd _JH; // measurment jacobian
     Eigen::MatrixXd _R; // measurement noise covariance
-    Eigen::MatrixXd _I; // Identity matrix
-    Eigen::MatrixXd _JA; // Jacobian state matrix
+    Eigen::MatrixXd m_I;    // Identity matrix
+    Eigen::MatrixXd m_Fj;   // Jacobian state matrix
     Eigen::MatrixXd _S; // Matrix for storing intermediate step in update part
     Eigen::MatrixXd _K; // Kalman Gain
-    Eigen::VectorXd _state; // State - x y heading velocity yaw_rat long_acceleration
+    Eigen::VectorXd m_state;// State - x y heading velocity yaw_rat long_acceleration
 };
 
 #endif /* ekf_hpp */

@@ -24,7 +24,7 @@ using namespace geodectic_converter;
  */
 class Fusion {
 private:
-    const int _n = 6;
+    const int32_t _n = 6;
     bool m_initialized;
     long long timestamp;
     Eigen::MatrixXd m_P;
