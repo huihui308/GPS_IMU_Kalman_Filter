@@ -22,7 +22,7 @@ DataPoint::DataPoint(bool verbose = false)
     _RadiusEarth = 6378388.0; //m
     _arc = 2.0 * M_PI * (_RadiusEarth + 230)/360.0; // degree
     this->verbose = verbose;
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "     DATAPOINT: ----- Initialized.....\r\n";
     }
 }
@@ -57,7 +57,7 @@ void DataPoint::set(
         _prev_long = raw_data(1);
         _arc = 2.0 * M_PI * (_RadiusEarth + raw_data(5))/360.0;
         _first_data_point = false;
-    } else if(!_first_data_point) {
+    } else if ( !_first_data_point ) {
         _arc = 2.0 * M_PI * (_RadiusEarth + raw_data(5))/360.0;
         _dx = _arc * cos(raw_data(0) * M_PI/180.0) * (raw_data(1) - _prev_long);
         _dy = _arc * (raw_data(0) - _prev_lat);

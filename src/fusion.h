@@ -24,7 +24,7 @@ using namespace geodectic_converter;
  */
 class Fusion {
 private:
-    const int32_t _n = 6;
+    const int32_t m_n = 6;
     bool m_initialized;
     long long timestamp;
     Eigen::MatrixXd m_P;
@@ -42,9 +42,9 @@ private:
     double _max_turn_rate;
     double _max_acceleration;
     double _max_yaw_accel;
-    long long _timestamp;
+    long long m_timestamp;
     // GPS offsets
-    double _xOffset, _yOffset;
+    double m_xOffset, m_yOffset;
     bool verbose;
 
 public:

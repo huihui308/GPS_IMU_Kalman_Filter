@@ -21,11 +21,11 @@ Fusion::Fusion(
     double xOffset,
     double yOffset,
     bool verbose)
-: m_initialized(false), _max_turn_rate(max_turn_rate), _max_acceleration(max_acceleration), _max_yaw_accel(max_yaw_accel), _xOffset(xOffset),
-  _yOffset(yOffset), m_KF(verbose)
+: m_initialized(false), _max_turn_rate(max_turn_rate), _max_acceleration(max_acceleration), _max_yaw_accel(max_yaw_accel), m_xOffset(xOffset),
+  m_yOffset(yOffset), m_KF(verbose)
 {
     // Initialize initial uncertainity P0
-    m_P = Eigen::MatrixXd(_n, _n);
+    m_P = Eigen::MatrixXd(m_n, m_n);
     m_P <<
         1000.0, 0.0,    0.0,    0.0,    0.0,    0.0,
         0.0,    1000.0, 0.0,    0.0,    0.0,    0.0,
@@ -54,7 +54,7 @@ void const Fusion::updateQ(double dt)
         std::cout << " =========================== FUSION:  Updating Q --- " << "\r\n";
     }
     // Process Noise Covariance Matrix Q
-    m_Q = Eigen::MatrixXd(_n, _n);
+    m_Q = Eigen::MatrixXd(m_n, m_n);
     _sGPS = 0.5 * _max_acceleration * pow(dt, 2);
     _sVelocity = _max_acceleration * dt;
     _sCourse = _max_turn_rate * dt;
@@ -71,99 +71,104 @@ void const Fusion::updateQ(double dt)
     m_KF.setQ(m_Q);
 }
 
-void Fusion::start(const DataPoint &data)
+void Fusion::start(const DataPoint& aiqData)
 {
     if ( this->verbose ) {
         std::cout << "    Fusion: ------ In start.....\r\n";
     }
-    _timestamp = data.get_timestamp();
-    Eigen::VectorXd state = data.get_state();
-    m_KF.start(_n, state, m_P, m_F, m_Q);
+    m_timestamp = aiqData.get_timestamp();
+    Eigen::VectorXd state = aiqData.get_state();
+    m_KF.start(m_n, state, m_P, m_F, m_Q);
     m_initialized = true;
 }
 
-void Fusion::compute(const DataPoint &data)
+void Fusion::compute(const DataPoint& aiqData)
 {
     /*******************************************
      * Prediction Step
      - Assumes current velocity is the same for this dt
      *******************************************/
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "    Fusion: ------ In compute.....\r\n";
     }
     // Assuming 1.e6 for timestamp - confirm after running on the system
-    const double dt = (data.get_timestamp())/ 1.e6;
+    const double dt = (aiqData.get_timestamp())/ 1.e6;
     // const double dt = 0.1;
-    if (this->verbose) {
-        std::cout << dt << "timestep in compute";
-    }
-    _timestamp = data.get_timestamp();
-
+    m_timestamp = aiqData.get_timestamp();
     // Update Q
     this->updateQ(dt);
     // Update state and calculate jacobian
     m_KF.updateFj(dt);
     // Prediction
     m_KF.predict();
-
     /*******************************************
      * Update Step
      - Updates appropriate matrices given a measurement
      - Assumes measurement is received either from GPS or IMU
      *******************************************/
-    Eigen::VectorXd zz = data.get_state();
+    Eigen::VectorXd zz = aiqData.get_state();
     Eigen::VectorXd z;
     z.resize(5);
     z <<
-        zz(0), //east
-        zz(1), //north
-        zz(3), //vel
-        zz(4), //yaw_rate
-        zz(5); //accel
+        zz(0), // px
+        zz(1), // py
+        zz(3), // vel
+        zz(4), // yaw_rate
+        zz(5); // accel
 
     const Eigen::VectorXd state = m_KF.get_resulting_state();
 
     Eigen::VectorXd Hx;
-    Eigen::MatrixXd JH;
+    Eigen::MatrixXd Hj;
 
     Hx.resize(5);
-    JH.resize(5,6);
+    Hj.resize(5, 6);
 
     // measurement function
+#if 0
     Hx <<
-        state(0) + _xOffset * cos(state(3)) - _yOffset * sin(state(3)),
-        state(1) + _xOffset * sin(state(3)) + _yOffset * cos(state(3)),
+        state(0) + m_xOffset * cos(state(3)) - m_yOffset * sin(state(3)),
+        state(1) + m_xOffset * sin(state(3)) + m_yOffset * cos(state(3)),
         state(3),
         state(4),
         state(5);
-
-    double j13 = - _xOffset * sin(state(3)) - _yOffset * cos(state(3));
-    double j23 = _xOffset * cos(state(3)) - _yOffset * sin(state(3));
-    if (data.get_data_point_type() == DataPointType::GPS) {
-        JH <<  1.0, 0.0, j13, 0.0, 0.0, 0.0,
+    double j13 = -m_xOffset * sin(state(3)) - m_yOffset * cos(state(3));
+    double j23 = m_xOffset * cos(state(3)) - m_yOffset * sin(state(3));
+#else
+    Hx <<
+        state(0),
+        state(1),
+        state(3),
+        state(4),
+        state(5);
+    double j13 = 0.0;
+    double j23 = 0.0;
+#endif
+    if (aiqData.get_data_point_type() == DataPointType::GPS) {
+        Hj <<  1.0, 0.0, j13, 0.0, 0.0, 0.0,
                0.0, 1.0, j23, 0.0, 0.0, 0.0,
                0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
                0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
                0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
-        m_KF.update(z, Hx, JH, m_R);
-    } else if (data.get_data_point_type() == DataPointType::IMU) {
-        JH <<  0.0, 0.0, j13, 0.0, 0.0, 0.0,
+        m_KF.update(z, Hx, Hj, m_R);
+    } else if (aiqData.get_data_point_type() == DataPointType::IMU) {
+        Hj <<  0.0, 0.0, j13, 0.0, 0.0, 0.0,
                0.0, 0.0, j23, 0.0, 0.0, 0.0,
                0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
                0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
                0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
-        m_KF.update(z, Hx, JH, m_R);
+        m_KF.update(z, Hx, Hj, m_R);
     }
 }
 
-void Fusion::process(const DataPoint& data)
+void Fusion::process(const DataPoint& aiqData)
 {
     if ( this->verbose ) {
         std::cout << "    Fusion: ------ In process.....\r\n";
     }
-    if (0.0 < data.get_timestamp()) {
-        m_initialized ? this->compute(data) : this->start(data);
+    if (0.0 < aiqData.get_timestamp()) {
+        m_initialized ? this->compute(aiqData) : this->start(aiqData);
     }
 }
 

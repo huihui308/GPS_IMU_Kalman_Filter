@@ -90,12 +90,12 @@ private:
 
     Eigen::MatrixXd m_P;    // initial covaraince/uncertainity in states
     Eigen::MatrixXd m_Q;    // process noise covariance
-    Eigen::MatrixXd _JH; // measurment jacobian
-    Eigen::MatrixXd _R; // measurement noise covariance
+    Eigen::MatrixXd _JH;    // measurment jacobian
+    Eigen::MatrixXd _R;     // measurement noise covariance
     Eigen::MatrixXd m_I;    // Identity matrix
     Eigen::MatrixXd m_Fj;   // Jacobian state matrix
-    Eigen::MatrixXd _S; // Matrix for storing intermediate step in update part
-    Eigen::MatrixXd _K; // Kalman Gain
+    Eigen::MatrixXd m_S;    // Matrix for storing intermediate step in update part
+    Eigen::MatrixXd m_K;    // Kalman Gain
     Eigen::VectorXd m_state;// State - x y heading velocity yaw_rat long_acceleration
 };
 

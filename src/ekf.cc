@@ -128,19 +128,23 @@ void EKF::predict()
     m_P = m_Fj * m_P * m_Fj.transpose() + m_Q;
 }
 
-void EKF::update(const Eigen::VectorXd& Z, const Eigen::VectorXd& Hx, const Eigen::MatrixXd &JH, const Eigen::MatrixXd &R)
+void EKF::update(
+    const Eigen::VectorXd& Z,
+    const Eigen::VectorXd& z_mean,
+    const Eigen::MatrixXd& Hj,
+    const Eigen::MatrixXd& R)
 {
-    Eigen::MatrixXd JHT = m_P * JH.transpose();
+    Eigen::MatrixXd Hj_T = m_P * Hj.transpose();
     // Temporary variable for storing this intermediate value
-    Eigen::MatrixXd _S = JH * JHT  + R;
+    Eigen::MatrixXd m_S = Hj * Hj_T + R;
     // Compute the Kalman gain
-    _K = JHT * _S.inverse();
+    m_K = Hj_T * m_S.inverse();
     // Update the estimate
-    Eigen::VectorXd y = Z - Hx;
+    Eigen::VectorXd y = Z - z_mean;
 
-    m_state = m_state + _K * y;
+    m_state = m_state + m_K * y;
     // Update the error covariance
-    m_P = (m_I - _K * JH) * m_P;
+    m_P = (m_I - m_K * Hj) * m_P;
 }
 
 Eigen::VectorXd EKF::get_resulting_state() const
