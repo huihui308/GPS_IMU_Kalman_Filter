@@ -11,8 +11,15 @@
 using namespace geodectic_converter;
 
 
+static const double kSemimajorAxis = 6378137;
+static const double kSemiminorAxis = 6356752.3142;
+static const double kFlattening = 1 / 298.257223563;
+static const double kFirstEccentricitySquared = 6.69437999014 * 0.001;
+static const double kSecondEccentricitySquared = 6.73949674228 * 0.001;
+
+
 GeodecticConverter::GeodecticConverter()
-:_have_reference(false)
+    :_have_reference(false)
 {}
 
 bool GeodecticConverter::isInitialised()
@@ -84,7 +91,6 @@ void GeodecticConverter::ecef2Geodetic(
     // J. Zhu, "Conversion of Earth-centered Earth-fixed coordinates
     // to geodetic coordinates," IEEE Transactions on Aerospace and
     // Electronic Systems, vol. 30, pp. 957-961, 1994.
-
     double r = sqrt(x * x + y * y);
     double Esq = kSemimajorAxis * kSemimajorAxis - kSemiminorAxis * kSemiminorAxis;
     double F = 54 * kSemiminorAxis * kSemiminorAxis * z * z;
@@ -97,6 +103,7 @@ void GeodecticConverter::ecef2Geodetic(
     double U = sqrt(pow((r - kFirstEccentricitySquared * r_0), 2) + z * z);
     double V = sqrt(pow((r - kFirstEccentricitySquared * r_0), 2) + (1 - kFirstEccentricitySquared) * z * z);
     double Z_0 = kSemiminorAxis * kSemiminorAxis * z / (kSemimajorAxis * V);
+
     *altitude = U * (1 - kSemiminorAxis * kSemiminorAxis / (kSemimajorAxis * V));
     *latitude = rad2Deg(atan((z + kSecondEccentricitySquared * Z_0) / r));
     *longitude = rad2Deg(atan2(y, x));
@@ -207,3 +214,42 @@ void GeodecticConverter::enu2Geodetic(
     ned2Ecef(aux_north, aux_east, aux_down, &x, &y, &z);
     ecef2Geodetic(x, y, z, latitude, longitude, altitude);
 }
+
+
+
+double GeodecticConverter::rad2Deg(const double radians)
+{
+    return (radians / M_PI) * 180.0;
+}
+
+
+
+double GeodecticConverter::deg2Rad(const double degrees)
+{
+    return (degrees / 180.0) * M_PI;
+}
+
+Eigen::Matrix3d GeodecticConverter::nRe(
+    const double lat_radians,
+    const double lon_radians)
+{
+    const double sLat = sin(lat_radians);
+    const double sLon = sin(lon_radians);
+    const double cLat = cos(lat_radians);
+    const double cLon = cos(lon_radians);
+
+    Eigen::Matrix3d ret;
+    ret(0, 0) = -sLat * cLon;
+    ret(0, 1) = -sLat * sLon;
+    ret(0, 2) = cLat;
+    ret(1, 0) = -sLon;
+    ret(1, 1) = cLon;
+    ret(1, 2) = 0.0;
+    ret(2, 0) = cLat * cLon;
+    ret(2, 1) = cLat * sLon;
+    ret(2, 2) = sLat;
+
+    return ret;
+}
+
+
