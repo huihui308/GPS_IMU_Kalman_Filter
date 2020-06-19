@@ -5,8 +5,8 @@
 // Created by Karan on 5/2/18.
 // Copyright � 2018 Karan. All rights reserved.
 #include <eigen3/Eigen/Dense>
-#include "fusion.hpp"
-#include "run_fusion.hpp"
+#include "fusion.h"
+#include "run_fusion.h"
 #include "parameterReader.h"
 //#include "csv_reader.hpp"
 

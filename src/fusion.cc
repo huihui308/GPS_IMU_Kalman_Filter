@@ -6,7 +6,7 @@
 //  Copyright � 2018 Karan. All rights reserved.
 //
 #include <iostream>
-#include "fusion.hpp"
+#include "fusion.h"
 #include "datapoint.h"
 
 

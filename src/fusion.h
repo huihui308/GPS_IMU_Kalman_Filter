@@ -10,8 +10,8 @@
 
 #include <stdio.h>
 #include <iostream>
-#include "ekf.hpp"
-#include "geo_ned.hpp"
+#include "ekf.h"
+#include "geo_ned.h"
 #include "Eigen/Dense"
 #include "datapoint.h"
 

@@ -1,6 +1,6 @@
 #include <mutex>
 #include <time.h>
-#include "fusion.hpp"
+#include "fusion.h"
 #include "Eigen/Dense"
 #include "parameterReader.h"
 

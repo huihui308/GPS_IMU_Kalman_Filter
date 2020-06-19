@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <iostream>
-#include "geo_ned.hpp"
+#include "geo_ned.h"
 #include "Eigen/Dense"
 
 

@@ -8,8 +8,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include "fusion.hpp"
-#include "run_fusion.hpp"
+#include "fusion.h"
+#include "run_fusion.h"
 #include "glog/logging.h"
 
 
