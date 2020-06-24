@@ -13,6 +13,10 @@
 #include "Eigen/Dense"
 
 
+#define GPS_VECTOR_SIZE                     (4)
+#define IMU_VECTOR_SIZE                     (2)
+
+
 /**
  * @brief EKF base class implementing generic Extended Kalman Filter
  */

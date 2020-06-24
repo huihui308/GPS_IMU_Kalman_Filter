@@ -10,6 +10,9 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 
+#define STATE_NUM                       (6)
+
+
 enum class DataPointType {
     IMU, GPS
 };

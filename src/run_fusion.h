@@ -5,13 +5,6 @@
 #include "parameterReader.h"
 
 
-// Read these parameters from the file
-struct EKFParams {
-    double varGPS, varSpeed, varYaw, varAcc;
-    double maxAccel, maxTurnRate, maxYawAccel;
-    double xOff, yOff;
-};
-
 
 /**
  * @brief Class with the highest level of abstraction for the GPS INS estimation system. Uses DataPoint and Fusion

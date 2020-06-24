@@ -12,5 +12,17 @@
 #include "Eigen/Dense"
 
 
+// Read these parameters from the file
+struct EKFParams {
+    double varGPS, varSpeed, varYaw, varAcc;
+    double maxAccel, maxTurnRate, maxYawAccel;
+    double xOff, yOff;
+};
+
+
+extern
+EKFParams
+getDefaultParams(void);
+
 
 #endif /* utils_hpp */

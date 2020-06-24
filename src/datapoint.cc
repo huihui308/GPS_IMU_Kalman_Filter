@@ -35,11 +35,11 @@ VectorXd DataPoint::get() const
 
 VectorXd DataPoint::get_state() const
 {
-    VectorXd state(6);
+    VectorXd state(STATE_NUM);
 
     if (this->data_type == DataPointType::IMU) {
-        double yaw_rat = this->raw(4);
-        double long_acc = this->raw(5);
+        double yaw_rat = this->raw(0);
+        double long_acc = this->raw(1);
 
         state << 0.0, 0.0, 0.0, 0.0, yaw_rat, long_acc;
     } else if (this->data_type == DataPointType::GPS) {
@@ -56,7 +56,7 @@ VectorXd DataPoint::get_state() const
 
 VectorXd DataPoint::get_vec() const
 {
-    VectorXd vec(6 - 1);
+    VectorXd vec(STATE_NUM);
 
 #if 0
     if (this->data_type == DataPointType::LIDAR) {
