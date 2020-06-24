@@ -43,7 +43,7 @@ Eigen::MatrixXd calculate_joacobian(
     const double dt)
 {
     // Assumes Jacobian is 6 x 6
-    Eigen::MatrixXd JA = Eigen::MatrixXd::Zero(6, 6);
+    Eigen::MatrixXd Fj = Eigen::MatrixXd::Zero(6, 6);
     // Assumes the size of input vector is 6
     const double psi = v(2);
     const double velocity = v(3);
@@ -52,7 +52,7 @@ Eigen::MatrixXd calculate_joacobian(
 
     // Avoid dividing by zero
     if (THRESHOLD > psi_dot) {
-        return JA;
+        return Fj;
     }
     //------
     const double turn_radius = (velocity/psi_dot);
@@ -67,7 +67,7 @@ Eigen::MatrixXd calculate_joacobian(
     const double a24 = psi_dot_inverse * (cos(psi) - cos(pdotp));
     const double a25 = dt * turn_radius * sin(pdotp) - (velocity/(pow(psi_dot, 2))) * (cos(psi) - cos(pdotp));
 
-    JA <<
+    Fj <<
         1.0, 0.0, a13, a14, a15, 0.0,
         0.0, 1.0, a23, a24, a25, 0.0,
         0.0, 0.0, 1.0, 0.0, dt,  0.0,
@@ -75,7 +75,7 @@ Eigen::MatrixXd calculate_joacobian(
         0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 0.0, 0.0, 1.0 ;
 
-    return JA;
+    return Fj;
 }
 
 /*******************************************

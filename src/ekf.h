@@ -80,7 +80,11 @@ public:
      * @param JH Jacobian of the measurment model
      * @param R Measurement noise
      */
-    void update(const Eigen::VectorXd& Z, const Eigen::VectorXd& Hx, const Eigen::MatrixXd &JH, const Eigen::MatrixXd &R);
+    void update(
+        const Eigen::VectorXd& Z,
+        const Eigen::VectorXd& Hx,
+        const Eigen::MatrixXd& JH,
+        const Eigen::MatrixXd& R);
 
 private:
     // Flag to indicate if the filter has started

@@ -11,16 +11,16 @@
  * @brief Default constructor
  */
 DataPoint::DataPoint(bool verbose = false)
-    :_initialized(false), _first_data_point(true)
+    :m_initialized(false), m_first_data_point(true)
 {
-    _dx = 0;
-    _dy = 0;
-    _mx = 0;
-    _my = 0;
-    _ds = 0;
+    m_dx = 0;
+    m_dy = 0;
+    m_mx = 0;
+    m_my = 0;
+    m_ds = 0;
 
-    _RadiusEarth = 6378388.0; //m
-    _arc = 2.0 * M_PI * (_RadiusEarth + 230)/360.0; // degree
+    m_RadiusEarth = 6378388.0; //m
+    m_arc = 2.0 * M_PI * (m_RadiusEarth + 230)/360.0; // degree
     this->verbose = verbose;
     if ( this->verbose ) {
         std::cout << "     DATAPOINT: ----- Initialized.....\r\n";
@@ -40,42 +40,42 @@ void DataPoint::set(
     const DataPointType data_type,
     const Eigen::VectorXd& raw_data)
 {
-    if (this->verbose) {
+    if ( this->verbose ) {
         std::cout << "        DATAPOINT: ----- In set\r\n";
     }
-    _raw_data.resize(raw_data.size());
-    _timestamp = timestamp;
-    _raw_data = raw_data;
-    _initialized = true;
+    m_raw_data.resize(raw_data.size());
+    m_timestamp = timestamp;
+    m_raw_data = raw_data;
+    m_initialized = true;
 
-    if (_first_data_point && raw_data(0)!=0.0 && raw_data(1)!=0.0) {
-        _dx = 0;
-        _dy = 0;
-        _mx = 0;
-        _my = 0;
-        _prev_lat = raw_data(0);
-        _prev_long = raw_data(1);
-        _arc = 2.0 * M_PI * (_RadiusEarth + raw_data(5))/360.0;
-        _first_data_point = false;
-    } else if ( !_first_data_point ) {
-        _arc = 2.0 * M_PI * (_RadiusEarth + raw_data(5))/360.0;
-        _dx = _arc * cos(raw_data(0) * M_PI/180.0) * (raw_data(1) - _prev_long);
-        _dy = _arc * (raw_data(0) - _prev_lat);
-        _ds = sqrt(_dx * _dx + _dy * _dy);
+    if ((m_first_data_point && raw_data(0) != 0.0) && (raw_data(1) != 0.0)) {
+        m_dx = 0;
+        m_dy = 0;
+        m_mx = 0;
+        m_my = 0;
+        m_prev_lat = raw_data(0);
+        m_prev_long = raw_data(1);
+        m_arc = 2.0 * M_PI * (m_RadiusEarth + raw_data(5))/360.0;
+        m_first_data_point = false;
+    } else if ( !m_first_data_point ) {
+        m_arc = 2.0 * M_PI * (m_RadiusEarth + raw_data(5))/360.0;
+        m_dx = m_arc * cos(raw_data(0) * M_PI/180.0) * (raw_data(1) - m_prev_long);
+        m_dy = m_arc * (raw_data(0) - m_prev_lat);
+        m_ds = sqrt(m_dx * m_dx + m_dy * m_dy);
 
-        if (_ds == 0.0) {
-            _data_type = DataPointType::IMU;
+        if (m_ds == 0.0) {
+            m_data_type = DataPointType::IMU;
         } else {
-            _data_type = DataPointType::GPS;
+            m_data_type = DataPointType::GPS;
         }
 
-        _mx += _dx; // cumulative sum
-        _my += _dy; // cumulative sum
-        if (this->verbose) {
-            std::cout << " Mx, My: " << _mx << ", " << _my << std::endl;
+        m_mx += m_dx; // cumulative sum
+        m_my += m_dy; // cumulative sum
+        if ( this->verbose ) {
+            std::cout << " Mx, My: " << m_mx << ", " << m_my << std::endl;
         }
-        _prev_lat = raw_data(0);
-        _prev_long = raw_data(1);
+        m_prev_lat = raw_data(0);
+        m_prev_long = raw_data(1);
     }
 }
 
@@ -89,12 +89,12 @@ Eigen::VectorXd DataPoint::get_state() const
     Eigen::VectorXd state(6);
 
     // Convert raw data to fusion readable states
-    double x = _mx;
-    double y = _my;
-    double vel = _raw_data(2);
+    double x = m_mx;
+    double y = m_my;
+    double vel = m_raw_data(2);
     double psi = 0;
-    double psi_dot = _raw_data(3);
-    double a = _raw_data(4);
+    double psi_dot = m_raw_data(3);
+    double a = m_raw_data(4);
 
     state << x, y, psi, vel, psi_dot, a;
 
@@ -108,7 +108,7 @@ Eigen::VectorXd DataPoint::get_state() const
  */
 Eigen::VectorXd DataPoint::get_raw_data() const
 {
-    return _raw_data;
+    return m_raw_data;
 }
 
 
@@ -119,7 +119,7 @@ Eigen::VectorXd DataPoint::get_raw_data() const
  */
 DataPointType DataPoint::get_data_point_type() const
 {
-    return _data_type;
+    return m_data_type;
 }
 
 /**
@@ -129,7 +129,7 @@ DataPointType DataPoint::get_data_point_type() const
  */
 long long DataPoint::get_timestamp() const
 {
-    return _timestamp;
+    return m_timestamp;
 }
 
 

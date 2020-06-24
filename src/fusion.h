@@ -26,22 +26,21 @@ class Fusion {
 private:
     const int32_t m_n = 6;
     bool m_initialized;
-    long long timestamp;
     Eigen::MatrixXd m_P;
     Eigen::MatrixXd m_Q;
     Eigen::MatrixXd m_F;
     Eigen::MatrixXd m_R;
     EKF m_KF;
 
-    double _sGPS;
-    double _sCourse;
-    double _sVelocity;
-    double _sYaw;
-    double _sAccel;
-    double _dt;
-    double _max_turn_rate;
-    double _max_acceleration;
-    double _max_yaw_accel;
+    double m_sGPS;
+    double m_sCourse;
+    double m_sVelocity;
+    double m_sYaw;
+    double m_sAccel;
+    double m_dt;
+    double m_max_turn_rate;
+    double m_max_acceleration;
+    double m_max_yaw_accel;
     long long m_timestamp;
     // GPS offsets
     double m_xOffset, m_yOffset;

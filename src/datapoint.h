@@ -74,31 +74,31 @@ public:
     long long get_timestamp() const;
 
 private:
-    double _x;          // lat
-    double _y;          // lon
-    double _z;          // vel
-    double _north;      // yaw_rate
-    double _east;       // long_accel
-    double _down;       // alt
+    double m_x;          // lat
+    double m_y;          // lon
+    double m_z;          // vel
+    double m_north;      // yaw_rate
+    double m_east;       // long_accel
+    double m_down;       // alt
     GeodecticConverter GPSDataConverter;
-    bool _initialized;
-    bool _first_data_point;
-    long long _timestamp;
-    Eigen::VectorXd _raw_data;
-    DataPointType _data_type;
+    bool m_initialized;
+    bool m_first_data_point;
+    long long m_timestamp;
+    Eigen::VectorXd m_raw_data;
+    DataPointType m_data_type;
 
-    double _prev_lat;
-    double _prev_long;
-    double _curr_lat;
-    double _curr_long;
-    double _dx;
-    double _dy;
-    double _mx;
-    double _my;
-    double _ds;
+    double m_prev_lat;
+    double m_prev_long;
+    double m_curr_lat;
+    double m_curr_long;
+    double m_dx;
+    double m_dy;
+    double m_mx;
+    double m_my;
+    double m_ds;
 
-    double _RadiusEarth;
-    double _arc;
+    double m_RadiusEarth;
+    double m_arc;
     bool verbose;
 };
 

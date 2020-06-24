@@ -19,12 +19,12 @@ static const double kSecondEccentricitySquared = 6.73949674228 * 0.001;
 
 
 GeodecticConverter::GeodecticConverter()
-    :_have_reference(false)
+    :m_have_reference(false)
 {}
 
 bool GeodecticConverter::isInitialised()
 {
-    return _have_reference;
+    return m_have_reference;
 }
 
 void GeodecticConverter::getReference(
@@ -32,9 +32,9 @@ void GeodecticConverter::getReference(
     double& longitude,
     double& altitude)
 {
-    latitude = _initial_latitude;
-    longitude = _initial_longitude;
-    altitude = _initial_altitude;
+    latitude = m_initial_latitude;
+    longitude = m_initial_longitude;
+    altitude = m_initial_altitude;
 
     return;
 }
@@ -45,20 +45,20 @@ void GeodecticConverter::intializeReference(
     const double altitude)
 {
     // Save origin
-    _initial_latitude = deg2Rad(latitude);
-    _initial_longitude = deg2Rad(longitude);
-    _initial_altitude = altitude;
+    m_initial_latitude = deg2Rad(latitude);
+    m_initial_longitude = deg2Rad(longitude);
+    m_initial_altitude = altitude;
 
     // Compute ECEF of NED origin
-    geodetic2Ecef(latitude, longitude, altitude, &_initial_ecef_x, &_initial_ecef_y, &_initial_ecef_z);
+    geodetic2Ecef(latitude, longitude, altitude, &m_initial_ecef_x, &m_initial_ecef_y, &m_initial_ecef_z);
 
     // Compute ECEF to NED and NED to ECEF matrices
-    double phiP = atan2(_initial_ecef_z, sqrt(pow(_initial_ecef_x, 2) + pow(_initial_ecef_y, 2)));
+    double phiP = atan2(m_initial_ecef_z, sqrt(pow(m_initial_ecef_x, 2) + pow(m_initial_ecef_y, 2)));
 
-    ecef_to_ned_matrix_ = nRe(phiP, _initial_longitude);
-    ned_to_ecef_matrix_ = nRe(_initial_latitude, _initial_longitude).transpose();
+    ecef_to_ned_matrix_ = nRe(phiP, m_initial_longitude);
+    ned_to_ecef_matrix_ = nRe(m_initial_latitude, m_initial_longitude).transpose();
 
-    _have_reference = true;
+    m_have_reference = true;
 }
 
 void GeodecticConverter::geodetic2Ecef(
@@ -121,9 +121,9 @@ void GeodecticConverter::ecef2Ned(
     // Coordinates relative to given ECEF coordinate frame.
 
     Eigen::Vector3d vect, ret;
-    vect(0) = x - _initial_ecef_x;
-    vect(1) = y - _initial_ecef_y;
-    vect(2) = z - _initial_ecef_z;
+    vect(0) = x - m_initial_ecef_x;
+    vect(1) = y - m_initial_ecef_y;
+    vect(2) = z - m_initial_ecef_z;
     ret = ecef_to_ned_matrix_ * vect;
     *north = ret(0);
     *east = ret(1);
@@ -144,9 +144,9 @@ void GeodecticConverter::ned2Ecef(
     ned(1) = east;
     ned(2) = -down;
     ret = ned_to_ecef_matrix_ * ned;
-    *x = ret(0) + _initial_ecef_x;
-    *y = ret(1) + _initial_ecef_y;
-    *z = ret(2) + _initial_ecef_z;
+    *x = ret(0) + m_initial_ecef_x;
+    *y = ret(1) + m_initial_ecef_y;
+    *z = ret(2) + m_initial_ecef_z;
 }
 
 void GeodecticConverter::geodetic2Ned(

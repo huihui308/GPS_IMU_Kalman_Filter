@@ -21,7 +21,7 @@ Fusion::Fusion(
     double xOffset,
     double yOffset,
     bool verbose)
-: m_initialized(false), _max_turn_rate(max_turn_rate), _max_acceleration(max_acceleration), _max_yaw_accel(max_yaw_accel), m_xOffset(xOffset),
+: m_initialized(false), m_max_turn_rate(max_turn_rate), m_max_acceleration(max_acceleration), m_max_yaw_accel(max_yaw_accel), m_xOffset(xOffset),
   m_yOffset(yOffset), m_KF(verbose)
 {
     // Initialize initial uncertainity P0
@@ -34,13 +34,19 @@ Fusion::Fusion(
         0.0,    0.0,    0.0,    0.0,    1000.0, 0.0,
         0.0,    0.0,    0.0,    0.0,    0.0,    1000.0;
 
-    m_R = Eigen::MatrixXd(5, 5); //Assuming 5 sources of measurement
+    // Assuming 5 sources of measurement
+    m_R = Eigen::MatrixXd(5, 5);
+    double a11 = pow(varGPS, 2);
+    double a22 = pow(varGPS, 2);
+    double a33 = pow(varSpeed, 2);
+    double a44 = pow(varYaw, 2);
+    double a55 = pow(varAcc, 2);
     m_R <<
-        pow(varGPS, 2), 0.0, 0.0, 0.0, 0.0,
-        0.0, pow(varGPS, 2), 0.0, 0.0, 0.0,
-        0.0, 0.0, pow(varSpeed, 2), 0.0, 0.0,
-        0.0, 0.0, 0.0, pow(varYaw, 2), 0.0,
-        0.0, 0.0, 0.0, 0.0, pow(varAcc, 2);
+        a11, 0.0, 0.0, 0.0, 0.0,
+        0.0, a22, 0.0, 0.0, 0.0,
+        0.0, 0.0, a33, 0.0, 0.0,
+        0.0, 0.0, 0.0, a44, 0.0,
+        0.0, 0.0, 0.0, 0.0, a55;
 
     this->verbose = verbose;
     if ( verbose ) {
@@ -55,18 +61,25 @@ void const Fusion::updateQ(double dt)
     }
     // Process Noise Covariance Matrix Q
     m_Q = Eigen::MatrixXd(m_n, m_n);
-    _sGPS = 0.5 * _max_acceleration * pow(dt, 2);
-    _sVelocity = _max_acceleration * dt;
-    _sCourse = _max_turn_rate * dt;
-    _sYaw = _max_yaw_accel * dt;
-    _sAccel = _max_acceleration;
+    m_sGPS = 0.5 * m_max_acceleration * pow(dt, 2);
+    m_sVelocity = m_max_acceleration * dt;
+    m_sCourse = m_max_turn_rate * dt;
+    m_sYaw = m_max_yaw_accel * dt;
+    m_sAccel = m_max_acceleration;
+
+    double a11 = pow(m_sGPS, 2);
+    double a22 = pow(m_sGPS, 2);
+    double a33 = pow(m_sCourse, 2);
+    double a44 = pow(m_sVelocity, 2);
+    double a55 = pow(m_sYaw, 2);
+    double a66 = pow(m_sAccel, 2);
     m_Q <<
-        pow(_sGPS, 2), 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, pow(_sGPS, 2), 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, pow(_sCourse, 2), 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, pow(_sVelocity, 2), 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, pow(_sYaw, 2), 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, pow(_sAccel, 2);
+        a11, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, a22, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, a33, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, a44, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, a55, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, a66;
 
     m_KF.setQ(m_Q);
 }

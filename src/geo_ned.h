@@ -9,12 +9,12 @@
 #define geo_ned_hpp
 
 #include <stdio.h>
-#include "Eigen/Dense"
+#include <stdlib.h>
+#include <cmath>
+#include <vector>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h>
-#include <vector>
-#include <cmath>
+#include "Eigen/Dense"
 
 
 using Eigen::MatrixXd;
@@ -106,14 +106,14 @@ public:
         double* altitude);
 
 private:
-    bool _have_reference;
-    double _initial_latitude;
-    double _initial_longitude;
-    double _initial_altitude;
+    bool m_have_reference;
+    double m_initial_latitude;
+    double m_initial_longitude;
+    double m_initial_altitude;
 
-    double _initial_ecef_x;
-    double _initial_ecef_y;
-    double _initial_ecef_z;
+    double m_initial_ecef_x;
+    double m_initial_ecef_y;
+    double m_initial_ecef_z;
 
     Eigen::Matrix3d ned_to_ecef_matrix_;
     Eigen::Matrix3d ecef_to_ned_matrix_;
