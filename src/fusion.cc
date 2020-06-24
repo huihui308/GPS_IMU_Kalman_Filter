@@ -157,7 +157,7 @@ void Fusion::compute(const DataPoint& aiqData)
     double j13 = 0.0;
     double j23 = 0.0;
 #endif
-    if (aiqData.get_data_point_type() == DataPointType::GPS) {
+    if (aiqData.get_type() == DataPointType::GPS) {
         Hj <<  1.0, 0.0, j13, 0.0, 0.0, 0.0,
                0.0, 1.0, j23, 0.0, 0.0, 0.0,
                0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
@@ -165,7 +165,7 @@ void Fusion::compute(const DataPoint& aiqData)
                0.0, 0.0, 0.0, 0.0, 0.0, 1.0;
 
         m_KF.update(z, Hx, Hj, m_R);
-    } else if (aiqData.get_data_point_type() == DataPointType::IMU) {
+    } else if (aiqData.get_type() == DataPointType::IMU) {
         Hj <<  0.0, 0.0, j13, 0.0, 0.0, 0.0,
                0.0, 0.0, j23, 0.0, 0.0, 0.0,
                0.0, 0.0, 0.0, 1.0, 0.0, 0.0,

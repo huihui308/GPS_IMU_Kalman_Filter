@@ -90,7 +90,7 @@ private:
     // Flag to indicate if the filter has started
     bool _init;
     bool verbose;
-    int32_t m_num_states; // Number of states in the EKF
+    int32_t m_num_states;   // Number of states in the EKF
 
     Eigen::MatrixXd m_P;    // initial covaraince/uncertainity in states
     Eigen::MatrixXd m_Q;    // process noise covariance

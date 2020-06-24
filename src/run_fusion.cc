@@ -53,7 +53,7 @@ GpsIns::GpsIns(bool verbose)
     _raw_data = Eigen::VectorXd(6);
     filter = new Fusion(params.maxAccel, params.maxTurnRate, params.maxYawAccel, params.varGPS, params.varSpeed, params.varYaw, params.varAcc, params.xOff, params.yOff, verbose);
 
-    _sensor_data = new DataPoint(verbose);
+    _sensor_data = new DataPoint();
     _prev_enc_counter = 0;
     _prev_gps_counter = 0;
     _prev_imu_counter = 0;

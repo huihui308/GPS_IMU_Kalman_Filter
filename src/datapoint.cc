@@ -1,135 +1,115 @@
-/************************************************************************
-    > File Name: src/datapoint.cc
-    > Author: david
-    > Mail: 305573571@qq.com
-    > Created Time: 2020年06月18日 星期四 11时57分58秒
- ************************************************************************/
 #include "datapoint.h"
 
 
-/**
- * @brief Default constructor
- */
-DataPoint::DataPoint(bool verbose = false)
-    :m_initialized(false), m_first_data_point(true)
-{
-    m_dx = 0;
-    m_dy = 0;
-    m_mx = 0;
-    m_my = 0;
-    m_ds = 0;
+using namespace std;
 
-    m_RadiusEarth = 6378388.0; //m
-    m_arc = 2.0 * M_PI * (m_RadiusEarth + 230)/360.0; // degree
-    this->verbose = verbose;
-    if ( this->verbose ) {
-        std::cout << "     DATAPOINT: ----- Initialized.....\r\n";
-    }
+
+DataPoint::DataPoint()
+{
+    this->initialized = false;
 }
 
-/**
- * @brief Retrieves raw sensor data and stores it in private variables
- *
- * @param timestamp Current timestamp for the sensor data
- * @param data_type Data type: Either GPS: which includes GPS+IMU data or IMU: which only includes the IMU data
- * @param raw_data Raw sensor data
- */
-// TODO remove data_type as it is not used anymore
+DataPoint::DataPoint(
+    const long long timestamp,
+    const DataPointType& data_type,
+    const VectorXd& raw)
+{
+    this->set(timestamp, data_type, raw);
+}
+
 void DataPoint::set(
     const long long timestamp,
-    const DataPointType data_type,
-    const Eigen::VectorXd& raw_data)
+    const DataPointType& data_type,
+    const VectorXd& raw)
 {
-    if ( this->verbose ) {
-        std::cout << "        DATAPOINT: ----- In set\r\n";
-    }
-    m_raw_data.resize(raw_data.size());
-    m_timestamp = timestamp;
-    m_raw_data = raw_data;
-    m_initialized = true;
-
-    if ((m_first_data_point && raw_data(0) != 0.0) && (raw_data(1) != 0.0)) {
-        m_dx = 0;
-        m_dy = 0;
-        m_mx = 0;
-        m_my = 0;
-        m_prev_lat = raw_data(0);
-        m_prev_long = raw_data(1);
-        m_arc = 2.0 * M_PI * (m_RadiusEarth + raw_data(5))/360.0;
-        m_first_data_point = false;
-    } else if ( !m_first_data_point ) {
-        m_arc = 2.0 * M_PI * (m_RadiusEarth + raw_data(5))/360.0;
-        m_dx = m_arc * cos(raw_data(0) * M_PI/180.0) * (raw_data(1) - m_prev_long);
-        m_dy = m_arc * (raw_data(0) - m_prev_lat);
-        m_ds = sqrt(m_dx * m_dx + m_dy * m_dy);
-
-        if (m_ds == 0.0) {
-            m_data_type = DataPointType::IMU;
-        } else {
-            m_data_type = DataPointType::GPS;
-        }
-
-        m_mx += m_dx; // cumulative sum
-        m_my += m_dy; // cumulative sum
-        if ( this->verbose ) {
-            std::cout << " Mx, My: " << m_mx << ", " << m_my << std::endl;
-        }
-        m_prev_lat = raw_data(0);
-        m_prev_long = raw_data(1);
-    }
+    this->timestamp = timestamp;
+    this->data_type = data_type;
+    this->raw = raw;
+    this->initialized = true;
 }
 
-/**
- * @brief Returns saved raw data for sensor fusion
- *
- * @return Sensor data measurements
- */
-Eigen::VectorXd DataPoint::get_state() const
+VectorXd DataPoint::get() const
 {
-    Eigen::VectorXd state(6);
+    return this->raw;
+}
 
-    // Convert raw data to fusion readable states
-    double x = m_mx;
-    double y = m_my;
-    double vel = m_raw_data(2);
-    double psi = 0;
-    double psi_dot = m_raw_data(3);
-    double a = m_raw_data(4);
+VectorXd DataPoint::get_state() const
+{
+    VectorXd state(6);
 
-    state << x, y, psi, vel, psi_dot, a;
+    if (this->data_type == DataPointType::IMU) {
+        double yaw_rat = this->raw(4);
+        double long_acc = this->raw(5);
+
+        state << 0.0, 0.0, 0.0, 0.0, yaw_rat, long_acc;
+    } else if (this->data_type == DataPointType::GPS) {
+        double px = this->raw(0);
+        double py = this->raw(1);
+        double heading = this->raw(2);
+        double velocity = this->raw(3);
+
+        state << px, py, heading, velocity, 0.0, 0.0;
+    }
 
     return state;
 }
 
-/**
- * @brief Get raw sensor data
- *
- * @return Raw sensor data
- */
-Eigen::VectorXd DataPoint::get_raw_data() const
+VectorXd DataPoint::get_vec() const
 {
-    return m_raw_data;
+    VectorXd vec(6 - 1);
+
+#if 0
+    if (this->data_type == DataPointType::LIDAR) {
+        double px = this->raw(0);
+        double py = this->raw(1);
+
+        vec << px, py, 0.0, 0.0;
+    } else if (this->data_type == DataPointType::RADAR) {
+        double rho = this->raw(0);
+        double phi = this->raw(1);
+        double px = rho * cos(phi);
+        double py = rho * sin(phi);
+
+        vec << px, py, 0.0, 0.0;
+    } else if (this->data_type == DataPointType::STATE) {
+        double px = this->raw(0);
+        double py = this->raw(1);
+        double v = this->raw(3);
+        double yaw = this->raw(4);
+
+        double vx = v * cos(yaw);
+        double vy = v * sin(yaw);
+
+        vec << px, py, vx, vy;
+    } else if (this->data_type == DataPointType::TRUTH) {
+        vec = this->raw;
+    }
+#endif
+
+    return vec;
 }
 
 
-/**
- * @brief Get data type associated with the data at current timestep
- *
- * @return Data type: Either GPS or IMU
- */
-DataPointType DataPoint::get_data_point_type() const
-{
-    return m_data_type;
-}
-
-/**
- * @brief Get current timestamp
- *
- * @return Timestamp associated with current data
- */
 long long DataPoint::get_timestamp() const
 {
-    return m_timestamp;
+    return this->timestamp;
 }
 
+DataPointType DataPoint::get_type() const
+{
+    return this->data_type;
+}
 
+void DataPoint::print() const
+{
+#if 0
+    if (this->initialized) {
+        cout << "Timestamp: " << this->timestamp << endl;
+        cout << "Sensor ID: " << static_cast<int>(this->data_type) << " (LIDAR = 0 | RADAR = 1 | STATE = 2) " << endl;
+        cout << "Raw Data: " << endl;
+        cout << this->raw << endl;
+    } else {
+        cout << "DataPoint is not initialized." << endl;
+    }
+#endif
+}
